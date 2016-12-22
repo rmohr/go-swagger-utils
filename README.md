@@ -71,3 +71,13 @@ If `-out` is omitted, the full path and name of the input file is taken and a
 `_swagger_generated.go` prefix will be added to it.  So if the input file was
 `~/wherever/test.go`, the resulting output file will be
 `~/wherever/test_swagger_generated.go`.
+
+`swagger-doc` can be integrated into the `go generate` flow like this:
+
+```golang
+package mypackage
+//go:generate swagger-doc
+```
+
+`swagger-doc` will use the `GOFILE` environment variable to find out on which
+file it is invoked by `go generate`.
