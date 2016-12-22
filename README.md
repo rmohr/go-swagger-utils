@@ -39,7 +39,7 @@ func (Person) SwaggerDoc() map[string]string {
 
 The original structs look like this:
 
-```
+```golang
 //Address doc
 type Address struct {
 	//Country doc
