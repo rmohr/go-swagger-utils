@@ -3,6 +3,11 @@ Go generator tools which help creating swagger specs.
 
 ## swagger-doc
 
+This tool can be used to generate descriptions out of struct and field comments
+for [go-restful](https://github.com/emicklei/go-restful). See
+[go-restful/swagger](https://github.com/emicklei/go-restful/tree/master/swagger)
+for more details.
+
 Get the tool:
 
 ```bash
