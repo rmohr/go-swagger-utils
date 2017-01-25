@@ -1,4 +1,7 @@
 # go-swagger-utils
+
+[![Build Status](https://travis-ci.org/rmohr/go-swagger-utils.svg?branch=master)](https://travis-ci.org/rmohr/go-swagger-utils)
+
 Go generator tools which help creating swagger specs. 
 
 ## swagger-doc
