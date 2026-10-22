@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-//Address doc
-//FIXME whatever
+// Address doc
+// FIXME whatever
 type Address struct {
 	//Country doc
 	// TODO should be filtered out
@@ -18,9 +18,9 @@ type Address struct {
 	PostCode int `json:"postcode,omitempty"`
 }
 
-//Person doc
+// Person doc
 // TODO should be filtered out
-//with multiline
+// with multiline
 type Person struct {
 	//FirstName doc
 	FirstName string `json:"firstName,omitempty"`
@@ -55,6 +55,24 @@ type StructWithStructDocOnly struct {
 type StructWithFieldDocOnly struct {
 	//MiddleName doc
 	MiddleName string `json:"middleName"`
+}
+
+// StructWithAllFilters doc
+// +optional
+// +nullable
+// +enum=["a","b"]
+// +listType=map
+// +listMapKey=name
+// +patchMergeKey=name
+// +patchStrategy=merge
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:validation:Required
+// +genclient:noVerbs
+type StructWithAllFilters struct {
+	// Field doc
+	// +kubebuilder:validation:MinLength=1
+	// +optional
+	Name string `json:"name"`
 }
 
 var expected = strings.TrimSpace(`
@@ -98,6 +116,13 @@ func (StructWithFieldDocOnly) SwaggerDoc() map[string]string {
 	return map[string]string{
 		"middleName": "MiddleName doc",
 	}
+}
+
+func (StructWithAllFilters) SwaggerDoc() map[string]string {
+	return map[string]string{
+		"":     "StructWithAllFilters doc",
+		"name": "Field doc",
+	}
 }`)
 
 func TestSwaggerDocGeneration(t *testing.T) {
@@ -115,5 +140,34 @@ func TestSwaggerDocGeneration(t *testing.T) {
 	buf = strings.TrimSpace(buf)
 	if buf != expected {
 		t.Fatalf("Expected: %s, got: %s", expected, buf)
+	}
+}
+
+func TestShouldFilter(t *testing.T) {
+	for _, tc := range []struct {
+		line     string
+		expected bool
+	}{
+		{"TODO refactor this", true},
+		{"FIXME broken", true},
+		{"+optional", true},
+		{"+nullable", true},
+		{"+enum=[\"a\",\"b\"]", true},
+		{"+listType=map", true},
+		{"+listMapKey=name", true},
+		{"+patchMergeKey=name", true},
+		{"+patchStrategy=merge", true},
+		{"+k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object", true},
+		{"+kubebuilder:validation:Required", true},
+		{"+genclient:noVerbs", true},
+		{"This is a normal doc comment", false},
+		{"Returns the name of the resource", false},
+		{"", false},
+	} {
+		t.Run(tc.line, func(t *testing.T) {
+			if got := shouldFilter(tc.line); got != tc.expected {
+				t.Errorf("shouldFilter(%q) = %v, want %v", tc.line, got, tc.expected)
+			}
+		})
 	}
 }

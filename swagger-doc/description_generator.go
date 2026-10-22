@@ -15,6 +15,21 @@ import (
 	"unicode/utf8"
 )
 
+var filterWords = []string{
+	"TODO",
+	"FIXME",
+	"+optional",
+	"+nullable",
+	"+enum",
+	"+listType",
+	"+listMapKey",
+	"+patchMergeKey",
+	"+patchStrategy",
+	"+k8s",
+	"+kubebuilder",
+	"+genclient",
+}
+
 func main() {
 	sourceFile := flag.String("in", os.Getenv("GOFILE"), "golang file containing strucs for swagger")
 	targetFile := flag.String("out", "", "target file where description should be written")
@@ -140,13 +155,22 @@ func Parse(f *ast.File) chan string {
 	return c
 }
 
+func shouldFilter(line string) bool {
+	for _, word := range filterWords {
+		if strings.HasPrefix(line, word) {
+			return true
+		}
+	}
+	return false
+}
+
 func filterDoc(doc string) string {
 	buf := ""
 	scanner := bufio.NewScanner(strings.NewReader(doc))
 	for scanner.Scan() {
 		token := scanner.Text()
 		trimmed := strings.TrimSpace(token)
-		if strings.HasPrefix(trimmed, "TODO") || strings.HasPrefix(trimmed, "FIXME") {
+		if shouldFilter(trimmed) {
 			continue
 		}
 		if strings.HasPrefix(trimmed, "---") {
